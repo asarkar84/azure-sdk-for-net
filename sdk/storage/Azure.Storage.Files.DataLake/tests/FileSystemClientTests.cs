@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Core.Testing;
 using Azure.Storage.Files.DataLake.Models;
-using Azure.Storage.Files.DataLake.Sas;
 using Azure.Storage.Sas;
 using Azure.Storage.Test;
 using NUnit.Framework;
@@ -100,6 +99,23 @@ namespace Azure.Storage.Files.DataLake.Tests
             {
                 await service.DeleteFileSystemAsync(fileSystemName);
             }
+        }
+
+        [Test]
+        public void Ctor_TokenCredential_Http()
+        {
+            // Arrange
+            TokenCredential tokenCredential = GetOAuthCredential(TestConfigHierarchicalNamespace);
+            Uri uri = new Uri(TestConfigHierarchicalNamespace.BlobServiceEndpoint).ToHttp();
+
+            // Act
+            TestHelper.AssertExpectedException(
+                () => new DataLakeFileSystemClient(uri, tokenCredential),
+                new ArgumentException("Cannot use TokenCredential without HTTPS."));
+
+            TestHelper.AssertExpectedException(
+                () => new DataLakeFileSystemClient(uri, tokenCredential, new DataLakeClientOptions()),
+                new ArgumentException("Cannot use TokenCredential without HTTPS."));
         }
 
         [Test]

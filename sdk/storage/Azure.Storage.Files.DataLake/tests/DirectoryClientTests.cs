@@ -10,7 +10,7 @@ using Azure.Storage.Files.DataLake.Models;
 using Azure.Storage.Sas;
 using Azure.Storage.Test;
 using NUnit.Framework;
-using TestConstants = Azure.Storage.Test.Constants;
+using TestConstants = Azure.Storage.Test.TestConstants;
 
 namespace Azure.Storage.Files.DataLake.Tests
 {
@@ -102,6 +102,23 @@ namespace Azure.Storage.Files.DataLake.Tests
             Assert.AreEqual(fileSystemName, directoryClient.FileSystemName);
             Assert.AreEqual($"{parentDirectoryName}/{directoryName}", directoryClient.Path);
             Assert.AreEqual(uri, directoryClient.Uri);
+        }
+
+        [Test]
+        public void Ctor_TokenCredential_Http()
+        {
+            // Arrange
+            TokenCredential tokenCredential = GetOAuthCredential(TestConfigHierarchicalNamespace);
+            Uri uri = new Uri(TestConfigHierarchicalNamespace.BlobServiceEndpoint).ToHttp();
+
+            // Act
+            TestHelper.AssertExpectedException(
+                () => new DataLakeDirectoryClient(uri, tokenCredential),
+                new ArgumentException("Cannot use TokenCredential without HTTPS."));
+
+            TestHelper.AssertExpectedException(
+                () => new DataLakeDirectoryClient(uri, tokenCredential, new DataLakeClientOptions()),
+                new ArgumentException("Cannot use TokenCredential without HTTPS."));
         }
 
         [Test]
