@@ -52,6 +52,11 @@ namespace Microsoft.Azure.Management.ResourceManager
         public string SubscriptionId { get; set; }
 
         /// <summary>
+        /// The ID of the source subscription.
+        /// </summary>
+        public string SubscriptionId1 { get; set; }
+
+        /// <summary>
         /// The API version to use for this operation.
         /// </summary>
         public string ApiVersion { get; private set; }
@@ -358,7 +363,7 @@ namespace Microsoft.Azure.Management.ResourceManager
             Tags = new TagsOperations(this);
             DeploymentOperations = new DeploymentOperations(this);
             BaseUri = new System.Uri("https://management.azure.com");
-            ApiVersion = "2019-07-01";
+            ApiVersion = "2019-10-01";
             AcceptLanguage = "en-US";
             LongRunningOperationRetryTimeout = 30;
             GenerateClientRequestId = true;

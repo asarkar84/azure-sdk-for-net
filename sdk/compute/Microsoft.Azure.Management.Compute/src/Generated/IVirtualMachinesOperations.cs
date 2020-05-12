@@ -77,7 +77,8 @@ namespace Microsoft.Azure.Management.Compute
         /// </exception>
         Task<AzureOperationResponse<VirtualMachineCaptureResult>> CaptureWithHttpMessagesAsync(string resourceGroupName, string vmName, VirtualMachineCaptureParameters parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
         /// <summary>
-        /// The operation to create or update a virtual machine.
+        /// The operation to create or update a virtual machine. Please note
+        /// some properties can be set only during virtual machine creation.
         /// </summary>
         /// <param name='resourceGroupName'>
         /// The name of the resource group.
@@ -259,7 +260,14 @@ namespace Microsoft.Azure.Management.Compute
         /// </exception>
         Task<AzureOperationResponse> DeallocateWithHttpMessagesAsync(string resourceGroupName, string vmName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
         /// <summary>
-        /// Sets the state of the virtual machine to generalized.
+        /// Sets the OS state of the virtual machine to generalized. It is
+        /// recommended to sysprep the virtual machine before performing this
+        /// operation. &lt;br&gt;For Windows, please refer to [Create a managed
+        /// image of a generalized VM in
+        /// Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/capture-image-resource).&lt;br&gt;For
+        /// Linux, please refer to [How to create an image of a virtual machine
+        /// or
+        /// VHD](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/capture-image).
         /// </summary>
         /// <param name='resourceGroupName'>
         /// The name of the resource group.
@@ -524,6 +532,29 @@ namespace Microsoft.Azure.Management.Compute
         /// </exception>
         Task<AzureOperationResponse> PerformMaintenanceWithHttpMessagesAsync(string resourceGroupName, string vmName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
         /// <summary>
+        /// The operation to simulate the eviction of spot virtual machine. The
+        /// eviction will occur within 30 minutes of calling the API
+        /// </summary>
+        /// <param name='resourceGroupName'>
+        /// The name of the resource group.
+        /// </param>
+        /// <param name='vmName'>
+        /// The name of the virtual machine.
+        /// </param>
+        /// <param name='customHeaders'>
+        /// The headers that will be added to request.
+        /// </param>
+        /// <param name='cancellationToken'>
+        /// The cancellation token.
+        /// </param>
+        /// <exception cref="Microsoft.Rest.Azure.CloudException">
+        /// Thrown when the operation returned an invalid status code
+        /// </exception>
+        /// <exception cref="Microsoft.Rest.ValidationException">
+        /// Thrown when a required parameter is null
+        /// </exception>
+        Task<AzureOperationResponse> SimulateEvictionWithHttpMessagesAsync(string resourceGroupName, string vmName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        /// <summary>
         /// Run command on the VM.
         /// </summary>
         /// <param name='resourceGroupName'>
@@ -581,7 +612,8 @@ namespace Microsoft.Azure.Management.Compute
         /// </exception>
         Task<AzureOperationResponse<VirtualMachineCaptureResult>> BeginCaptureWithHttpMessagesAsync(string resourceGroupName, string vmName, VirtualMachineCaptureParameters parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
         /// <summary>
-        /// The operation to create or update a virtual machine.
+        /// The operation to create or update a virtual machine. Please note
+        /// some properties can be set only during virtual machine creation.
         /// </summary>
         /// <param name='resourceGroupName'>
         /// The name of the resource group.

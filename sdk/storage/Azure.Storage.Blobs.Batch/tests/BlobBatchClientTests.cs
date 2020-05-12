@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.Core.Testing;
+using Azure.Core.TestFramework;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Test;
@@ -17,9 +17,11 @@ namespace Azure.Storage.Blobs.Test
 {
     public class BlobBatchClientTests : BlobTestBase
     {
-        public BlobBatchClientTests(bool async)
-            : base(async, null /* RecordedTestMode.Record /* to re-record */)
+        public BlobBatchClientTests(bool async, BlobClientOptions.ServiceVersion serviceVersion)
+            : base(async, serviceVersion, null /* RecordedTestMode.Record /* to re-record */)
         {
+            // Batch delimiters are random so disable body comparison
+            Matcher = new RecordMatcher(compareBodies: false);
         }
 
         [SetUp]

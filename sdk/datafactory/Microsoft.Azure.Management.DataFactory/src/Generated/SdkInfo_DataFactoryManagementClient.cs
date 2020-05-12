@@ -32,11 +32,21 @@ namespace Microsoft.Azure.Management.DataFactory
                 new Tuple<string, string, string>("DataFactory", "Operations", "2018-06-01"),
                 new Tuple<string, string, string>("DataFactory", "PipelineRuns", "2018-06-01"),
                 new Tuple<string, string, string>("DataFactory", "Pipelines", "2018-06-01"),
-                new Tuple<string, string, string>("DataFactory", "RerunTriggers", "2018-06-01"),
                 new Tuple<string, string, string>("DataFactory", "TriggerRuns", "2018-06-01"),
                 new Tuple<string, string, string>("DataFactory", "Triggers", "2018-06-01"),
               }.AsEnumerable();
           }
       }
+      // BEGIN: Code Generation Metadata Section
+      public static readonly String AutoRestVersion = "v2";
+      public static readonly String AutoRestBootStrapperVersion = "autorest@2.0.4413";
+      public static readonly String AutoRestCmdExecuted = "cmd.exe /c autorest.cmd https://github.com/Azure/azure-rest-api-specs/blob/master/specification/datafactory/resource-manager/readme.md --csharp --version=v2 --reflect-api-versions --tag=package-2018-06 --csharp-sdks-folder=C:\\azure-sdk-for-net\\sdk";
+      public static readonly String GithubForkName = "Azure";
+      public static readonly String GithubBranchName = "master";
+      public static readonly String GithubCommidId = "db22d3dabc7806bebc57e413368161252fa07c25";
+      public static readonly String CodeGenerationErrors = "";
+      public static readonly String GithubRepoName = "azure-rest-api-specs";
+      // END: Code Generation Metadata Section
   }
 }
+

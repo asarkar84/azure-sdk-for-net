@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Messaging.EventHubs.Amqp;
 using Azure.Messaging.EventHubs.Authorization;
+using Azure.Messaging.EventHubs.Consumer;
 using Azure.Messaging.EventHubs.Core;
 using Azure.Messaging.EventHubs.Diagnostics;
-using Azure.Messaging.EventHubs.Metadata;
 
 namespace Azure.Messaging.EventHubs
 {
@@ -91,7 +91,7 @@ namespace Azure.Messaging.EventHubs
         ///   Initializes a new instance of the <see cref="EventHubConnection"/> class.
         /// </summary>
         ///
-        /// <param name="connectionString">The connection string to use for connecting to the Event Hubs namespace; it is expected that the Event Hub name and SAS token are contained in this connection string.</param>
+        /// <param name="connectionString">The connection string to use for connecting to the Event Hubs namespace; it is expected that the Event Hub name and the shared key properties are contained in this connection string.</param>
         /// <param name="connectionOptions">A set of options to apply when configuring the connection.</param>
         ///
         /// <remarks>
@@ -130,7 +130,7 @@ namespace Azure.Messaging.EventHubs
         ///   Initializes a new instance of the <see cref="EventHubConnection"/> class.
         /// </summary>
         ///
-        /// <param name="connectionString">The connection string to use for connecting to the Event Hubs namespace; it is expected that the Event Hub name and SAS token are contained in this connection string.</param>
+        /// <param name="connectionString">The connection string to use for connecting to the Event Hubs namespace; it is expected that the shared key properties are contained in this connection string, but not the Event Hub name.</param>
         /// <param name="eventHubName">The name of the specific Event Hub to associate the connection with.</param>
         /// <param name="connectionOptions">A set of options to apply when configuring the connection.</param>
         ///
@@ -172,7 +172,10 @@ namespace Azure.Messaging.EventHubs
             FullyQualifiedNamespace = fullyQualifiedNamespace;
             EventHubName = eventHubName;
             Options = connectionOptions;
+
+#pragma warning disable CA2214 // Do not call overridable methods in constructors. This internal method is virtual for testing purposes.
             InnerClient = CreateTransportClient(fullyQualifiedNamespace, eventHubName, tokenCredentials, connectionOptions);
+#pragma warning restore CA2214 // Do not call overridable methods in constructors.
         }
 
         /// <summary>
@@ -189,7 +192,7 @@ namespace Azure.Messaging.EventHubs
                                   TokenCredential credential,
                                   EventHubConnectionOptions connectionOptions = default)
         {
-            Argument.AssertNotNullOrEmpty(fullyQualifiedNamespace, nameof(fullyQualifiedNamespace));
+            Argument.AssertWellFormedEventHubsNamespace(fullyQualifiedNamespace, nameof(fullyQualifiedNamespace));
             Argument.AssertNotNullOrEmpty(eventHubName, nameof(eventHubName));
             Argument.AssertNotNull(credential, nameof(credential));
 
@@ -202,7 +205,7 @@ namespace Azure.Messaging.EventHubs
                     break;
 
                 case EventHubSharedKeyCredential sharedKeyCredential:
-                    credential = sharedKeyCredential.ConvertToSharedAccessSignatureCredential(BuildAudienceResource(connectionOptions.TransportType, fullyQualifiedNamespace, eventHubName));
+                    credential = sharedKeyCredential.AsSharedAccessSignatureCredential(BuildAudienceResource(connectionOptions.TransportType, fullyQualifiedNamespace, eventHubName));
                     break;
             }
 
@@ -212,7 +215,9 @@ namespace Azure.Messaging.EventHubs
             EventHubName = eventHubName;
             Options = connectionOptions;
 
+#pragma warning disable CA2214 // Do not call overridable methods in constructors. This internal method is virtual for testing purposes.
             InnerClient = CreateTransportClient(fullyQualifiedNamespace, eventHubName, tokenCredential, connectionOptions);
+#pragma warning restore CA2214 // Do not call overridable methods in constructors.
         }
 
         /// <summary>
@@ -231,7 +236,7 @@ namespace Azure.Messaging.EventHubs
         ///
         /// <returns>A task to be resolved on when the operation has completed.</returns>
         ///
-        public async virtual Task CloseAsync(CancellationToken cancellationToken = default)
+        public virtual async Task CloseAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested<TaskCanceledException>();
             EventHubsEventSource.Log.ClientCloseStart(typeof(EventHubConnection), EventHubName, FullyQualifiedNamespace);
@@ -250,14 +255,6 @@ namespace Azure.Messaging.EventHubs
                 EventHubsEventSource.Log.ClientCloseComplete(typeof(EventHubConnection), EventHubName, FullyQualifiedNamespace);
             }
         }
-
-        /// <summary>
-        ///   Closes the connection to the Event Hubs namespace and associated Event Hub.
-        /// </summary>
-        ///
-        /// <param name="cancellationToken">An optional <see cref="CancellationToken"/> instance to signal the request to cancel the operation.</param>
-        ///
-        public virtual void Close(CancellationToken cancellationToken = default) => CloseAsync(cancellationToken).GetAwaiter().GetResult();
 
         /// <summary>
         ///   Performs the task needed to clean up resources used by the <see cref="EventHubConnection" />,
@@ -307,8 +304,8 @@ namespace Azure.Messaging.EventHubs
         ///
         /// <returns>The set of information for the Event Hub that this connection is associated with.</returns>
         ///
-        internal virtual Task<EventHubProperties> GetPropertiesAsync(EventHubsRetryPolicy retryPolicy,
-                                                                     CancellationToken cancellationToken = default) => InnerClient.GetPropertiesAsync(retryPolicy, cancellationToken);
+        internal virtual async Task<EventHubProperties> GetPropertiesAsync(EventHubsRetryPolicy retryPolicy,
+                                                                           CancellationToken cancellationToken = default) => await InnerClient.GetPropertiesAsync(retryPolicy, cancellationToken).ConfigureAwait(false);
 
         /// <summary>
         ///   Retrieves the set of identifiers for the partitions of an Event Hub.
@@ -340,9 +337,9 @@ namespace Azure.Messaging.EventHubs
         ///
         /// <returns>The set of information for the requested partition under the Event Hub this connection is associated with.</returns>
         ///
-        internal virtual Task<PartitionProperties> GetPartitionPropertiesAsync(string partitionId,
-                                                                               EventHubsRetryPolicy retryPolicy,
-                                                                               CancellationToken cancellationToken = default) => InnerClient.GetPartitionPropertiesAsync(partitionId, retryPolicy, cancellationToken);
+        internal virtual async Task<PartitionProperties> GetPartitionPropertiesAsync(string partitionId,
+                                                                                     EventHubsRetryPolicy retryPolicy,
+                                                                                     CancellationToken cancellationToken = default) => await InnerClient.GetPartitionPropertiesAsync(partitionId, retryPolicy, cancellationToken).ConfigureAwait(false);
 
         /// <summary>
         ///   Creates a producer strongly aligned with the active protocol and transport,
@@ -435,7 +432,9 @@ namespace Azure.Messaging.EventHubs
                     return new AmqpClient(fullyQualifiedNamespace, eventHubName, credential, options);
 
                 default:
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly.  "TransportType" is a reasonable name.  It's the property on the options argument which is invalid.
                     throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.InvalidTransportType, options.TransportType.ToString()), nameof(options.TransportType));
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
             }
         }
 
@@ -463,7 +462,7 @@ namespace Azure.Messaging.EventHubs
                 UserName = string.Empty,
             };
 
-            if (builder.Path.EndsWith("/"))
+            if (builder.Path.EndsWith("/", StringComparison.Ordinal))
             {
                 builder.Path = builder.Path.TrimEnd('/');
             }

@@ -3,7 +3,7 @@
 
 using System;
 using System.Net;
-using Azure.Core.Testing;
+using Azure.Core.TestFramework;
 using Azure.Storage.Sas;
 using Azure.Storage.Test.Shared;
 using NUnit.Framework;
@@ -12,8 +12,8 @@ namespace Azure.Storage.Blobs.Test
 {
     public class BlobUriBuilderTests : BlobTestBase
     {
-        public BlobUriBuilderTests(bool async)
-            : base(async, null /* RecordedTestMode.Record /* to re-record */)
+        public BlobUriBuilderTests(bool async, BlobClientOptions.ServiceVersion serviceVersion)
+            : base(async, serviceVersion, null /* RecordedTestMode.Record /* to re-record */)
         {
         }
 

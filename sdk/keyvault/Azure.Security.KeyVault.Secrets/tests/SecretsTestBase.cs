@@ -5,24 +5,34 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Azure.Core.Testing;
-using Azure.Identity;
+using Azure.Core.TestFramework;
+using Azure.Security.KeyVault.Tests;
 using NUnit.Framework;
 
 namespace Azure.Security.KeyVault.Secrets.Tests
 {
-    public abstract class SecretsTestBase : RecordedTestBase
+    [ClientTestFixture(
+        SecretClientOptions.ServiceVersion.V7_0,
+        SecretClientOptions.ServiceVersion.V7_1_Preview)]
+    [NonParallelizable]
+    public abstract class SecretsTestBase : RecordedTestBase<KeyVaultTestEnvironment>
     {
-        public const string AzureKeyVaultUrlEnvironmentVariable = "AZURE_KEYVAULT_URL";
+        protected readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(5);
+        private readonly SecretClientOptions.ServiceVersion _serviceVersion;
 
         public SecretClient Client { get; set; }
 
         public Uri VaultUri { get; set; }
 
-        private readonly ConcurrentQueue<string> _secretsToCleanup = new ConcurrentQueue<string>();
+        // Queue deletes, but poll on the top of the purge stack to increase likelihood of others being purged by then.
+        private readonly ConcurrentQueue<string> _secretsToDelete = new ConcurrentQueue<string>();
+        private readonly ConcurrentStack<string> _secretsToPurge = new ConcurrentStack<string>();
 
-        protected SecretsTestBase(bool isAsync) : base(isAsync)
+        private KeyVaultTestEventListener _listener;
+
+        protected SecretsTestBase(bool isAsync, SecretClientOptions.ServiceVersion serviceVersion) : base(isAsync)
         {
+            _serviceVersion = serviceVersion;
         }
 
         internal SecretClient GetClient(TestRecording recording = null)
@@ -31,43 +41,73 @@ namespace Azure.Security.KeyVault.Secrets.Tests
 
             return InstrumentClient
                 (new SecretClient(
-                    new Uri(recording.GetVariableFromEnvironment(AzureKeyVaultUrlEnvironmentVariable)),
-                    recording.GetCredential(new DefaultAzureCredential()),
-                    recording.InstrumentClientOptions(new SecretClientOptions())));
+                    new Uri(TestEnvironment.KeyVaultUrl),
+                    TestEnvironment.Credential,
+                    recording.InstrumentClientOptions(new SecretClientOptions(_serviceVersion))));
         }
 
         public override void StartTestRecording()
         {
             base.StartTestRecording();
 
+            _listener = new KeyVaultTestEventListener();
+
             Client = GetClient();
-            VaultUri = new Uri(Recording.GetVariableFromEnvironment(AzureKeyVaultUrlEnvironmentVariable));
+            VaultUri = new Uri(TestEnvironment.KeyVaultUrl);
+        }
+
+        public override void StopTestRecording()
+        {
+            _listener?.Dispose();
+
+            base.StopTestRecording();
+        }
+
+        [TearDown]
+        public async Task Cleanup()
+        {
+            // Start deleting resources as soon as possible.
+            while (_secretsToDelete.TryDequeue(out string name))
+            {
+                await DeleteSecret(name);
+
+                _secretsToPurge.Push(name);
+            }
         }
 
         [OneTimeTearDown]
-        public async Task Cleanup()
+        public async Task CleanupAll()
         {
-            List<Task> cleanupTasks = new List<Task>();
+            // Make sure the delete queue is empty.
+            await Cleanup();
 
-            foreach (string name in _secretsToCleanup)
+            while (_secretsToPurge.TryPop(out string name))
             {
-                Task cleanupTask = CleanupSecret(name);
-                cleanupTasks.Add(cleanupTask);
+                await PurgeSecret(name).ConfigureAwait(false);
             }
-
-            await Task.WhenAll(cleanupTasks);
         }
 
-        protected async Task CleanupSecret(string name)
+        protected async Task DeleteSecret(string name)
         {
+            if (Mode == RecordedTestMode.Playback)
+            {
+                return;
+            }
+
             try
             {
-                await Client.StartDeleteSecretAsync(name).ConfigureAwait(false);
+                using (Recording.DisableRecording())
+                {
+                    await Client.StartDeleteSecretAsync(name).ConfigureAwait(false);
+                }
             }
             catch (RequestFailedException ex) when (ex.Status == 404)
             {
             }
+        }
 
+        protected async Task PurgeSecret(string name)
+        {
             try
             {
                 await WaitForDeletedSecret(name).ConfigureAwait(false);
@@ -76,9 +116,17 @@ namespace Azure.Security.KeyVault.Secrets.Tests
             {
             }
 
+            if (Mode == RecordedTestMode.Playback)
+            {
+                return;
+            }
+
             try
             {
-                await Client.PurgeDeletedSecretAsync(name).ConfigureAwait(false);
+                using (Recording.DisableRecording())
+                {
+                    await Client.PurgeDeletedSecretAsync(name).ConfigureAwait(false);
+                }
             }
             catch (RequestFailedException ex) when (ex.Status == 404)
             {
@@ -87,7 +135,7 @@ namespace Azure.Security.KeyVault.Secrets.Tests
 
         protected void RegisterForCleanup(string name)
         {
-            _secretsToCleanup.Enqueue(name);
+            _secretsToDelete.Enqueue(name);
         }
 
         protected void AssertSecretsEqual(KeyVaultSecret exp, KeyVaultSecret act)
@@ -146,7 +194,7 @@ namespace Azure.Security.KeyVault.Secrets.Tests
 
             using (Recording.DisableRecording())
             {
-                return TestRetryHelper.RetryAsync(async () => await Client.GetDeletedSecretAsync(name).ConfigureAwait(false));
+                return TestRetryHelper.RetryAsync(async () => await Client.GetDeletedSecretAsync(name).ConfigureAwait(false), delay: PollingInterval);
             }
         }
 
@@ -169,7 +217,7 @@ namespace Azure.Security.KeyVault.Secrets.Tests
                     {
                         return (Response)null;
                     }
-                });
+                }, delay: PollingInterval);
             }
         }
 
@@ -182,7 +230,7 @@ namespace Azure.Security.KeyVault.Secrets.Tests
 
             using (Recording.DisableRecording())
             {
-                return TestRetryHelper.RetryAsync(async () => await Client.GetSecretAsync(name).ConfigureAwait(false));
+                return TestRetryHelper.RetryAsync(async () => await Client.GetSecretAsync(name).ConfigureAwait(false), delay: PollingInterval);
             }
         }
     }

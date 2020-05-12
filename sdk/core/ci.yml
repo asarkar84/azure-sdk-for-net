@@ -15,13 +15,14 @@ trigger:
   branches:
     include:
     - master
-    - feature/*
     - hotfix/*
     - release/*
   paths:
     include:
     - sdk/core/
     - eng/
+    exclude:
+    - eng/mgmt/
 
 pr:
   branches:
@@ -34,11 +35,15 @@ pr:
     include:
     - sdk/core/
     - eng/
+    - samples/
+    exclude:
+    - eng/mgmt/
 
 stages:
 - template: ../../eng/pipelines/templates/stages/archetype-sdk-client.yml
   parameters:
-    ServiceDirectory: '*'
+    ServiceDirectory: core
+    ServiceToBuild: '*'
     ArtifactName: packages
     Artifacts:
     - name: Azure.Core

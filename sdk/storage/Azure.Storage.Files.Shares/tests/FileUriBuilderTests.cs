@@ -3,7 +3,7 @@
 
 using System;
 using System.Net;
-using Azure.Core.Testing;
+using Azure.Core.TestFramework;
 using Azure.Storage.Files.Shares.Tests;
 using Azure.Storage.Sas;
 using NUnit.Framework;
@@ -12,8 +12,8 @@ namespace Azure.Storage.Files.Shares.Test
 {
     public class FileUriBuilderTests : FileTestBase
     {
-        public FileUriBuilderTests(bool async)
-            : base(async, null /* RecordedTestMode.Record /* to re-record */)
+        public FileUriBuilderTests(bool async, ShareClientOptions.ServiceVersion serviceVersion)
+            : base(async, serviceVersion, null /* RecordedTestMode.Record /* to re-record */)
         {
         }
 

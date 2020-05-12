@@ -66,8 +66,7 @@ namespace Azure.Storage.Blobs
         private int _port;
 
         /// <summary>
-        /// Gets or sets the Azure Storage account name.  This is only
-        /// populated for IP-style <see cref="System.Uri"/>s.
+        /// Gets or sets the Azure Storage account name.
         /// </summary>
         public string AccountName
         {
@@ -286,9 +285,9 @@ namespace Azure.Storage.Blobs
             if (!string.IsNullOrWhiteSpace(BlobContainerName))
             {
                 path.Append("/").Append(BlobContainerName);
-                if (!String.IsNullOrWhiteSpace(BlobName))
+                if (!string.IsNullOrWhiteSpace(BlobName))
                 {
-                    path.Append("/").Append(BlobName);
+                    path.Append("/").Append(Uri.EscapeDataString(BlobName));
                 }
             }
 

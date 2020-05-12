@@ -4,7 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Azure.Core;
-using Azure.Core.Testing;
+using Azure.Core.TestFramework;
 using Azure.Identity.Tests.Mock;
 using Microsoft.Identity.Client;
 using NUnit.Framework;
@@ -47,6 +47,28 @@ namespace Azure.Identity.Tests
             var mockMsalClient = new MockMsalPublicClient
             {
                 Accounts = new IAccount[] { new MockAccount("fakeuser@fakedomain.com"), new MockAccount("mockuser@mockdomain.com") },
+                SilentAuthFactory = (_) => { return AuthenticationResultFactory.Create(accessToken: expToken, expiresOn: expExpiresOn); }
+            };
+
+            var credential = InstrumentClient(new SharedTokenCacheCredential(null, "mockuser@mockdomain.com", CredentialPipeline.GetInstance(null), mockMsalClient));
+
+            AccessToken token = await credential.GetTokenAsync(new TokenRequestContext(MockScopes.Default));
+
+            Assert.AreEqual(expToken, token.Token);
+
+            Assert.AreEqual(expExpiresOn, token.ExpiresOn);
+        }
+
+
+        [Test]
+        public async Task OneMatchingAccountUsernameDifferentCasing()
+        {
+            string expToken = Guid.NewGuid().ToString();
+            DateTimeOffset expExpiresOn = DateTimeOffset.UtcNow.AddMinutes(5);
+
+            var mockMsalClient = new MockMsalPublicClient
+            {
+                Accounts = new IAccount[] { new MockAccount("fakeuser@fakedomain.com"), new MockAccount("MockUser@mockdomain.com") },
                 SilentAuthFactory = (_) => { return AuthenticationResultFactory.Create(accessToken: expToken, expiresOn: expExpiresOn); }
             };
 
@@ -164,11 +186,7 @@ namespace Azure.Identity.Tests
 
             var ex = Assert.ThrowsAsync<CredentialUnavailableException>(async () => await credential.GetTokenAsync(new TokenRequestContext(MockScopes.Default)));
 
-            Assert.True(ex.Message.StartsWith("Multiple accounts were found in the cache."));
-
-            Assert.True(ex.Message.Contains($"username: fakeuser@fakedomain.com tenantId: {fakeuserTenantId}"));
-
-            Assert.True(ex.Message.Contains($"username: madeupuser@madeupdomain.com tenantId: {madeupuserTenantId}"));
+            Assert.AreEqual(ex.Message, "SharedTokenCacheCredential authentication unavailable. Multiple accounts were found in the cache. Use username and tenant id to disambiguate.");
 
             await Task.CompletedTask;
         }
@@ -192,11 +210,7 @@ namespace Azure.Identity.Tests
 
             var ex = Assert.ThrowsAsync<CredentialUnavailableException>(async () => await credential.GetTokenAsync(new TokenRequestContext(MockScopes.Default)));
 
-            Assert.True(ex.Message.StartsWith("No account matching the specified username: mockuser@mockdomain.com was found in the cache."));
-
-            Assert.True(ex.Message.Contains($"username: fakeuser@fakedomain.com tenantId: {fakeuserTenantId}"));
-
-            Assert.True(ex.Message.Contains($"username: madeupuser@madeupdomain.com tenantId: {madeupuserTenantId}"));
+            Assert.AreEqual(ex.Message, "SharedTokenCacheCredential authentication unavailable. No account matching the specified username: mockuser@mockdomain.com was found in the cache.");
 
             await Task.CompletedTask;
         }
@@ -221,11 +235,7 @@ namespace Azure.Identity.Tests
 
             var ex = Assert.ThrowsAsync<CredentialUnavailableException>(async () => await credential.GetTokenAsync(new TokenRequestContext(MockScopes.Default)));
 
-            Assert.True(ex.Message.StartsWith($"No account matching the specified tenantId: {tenantId} was found in the cache."));
-
-            Assert.True(ex.Message.Contains($"username: fakeuser@fakedomain.com tenantId: {fakeuserTenantId}"));
-
-            Assert.True(ex.Message.Contains($"username: madeupuser@madeupdomain.com tenantId: {madeupuserTenantId}"));
+            Assert.AreEqual(ex.Message, $"SharedTokenCacheCredential authentication unavailable. No account matching the specified tenantId: {tenantId} was found in the cache.");
 
             await Task.CompletedTask;
         }
@@ -250,11 +260,7 @@ namespace Azure.Identity.Tests
 
             var ex = Assert.ThrowsAsync<CredentialUnavailableException>(async () => await credential.GetTokenAsync(new TokenRequestContext(MockScopes.Default)));
 
-            Assert.True(ex.Message.StartsWith($"No account matching the specified username: mockuser@mockdomain.com tenantId: {tenantId} was found in the cache."));
-
-            Assert.True(ex.Message.Contains($"username: fakeuser@fakedomain.com tenantId: {fakeuserTenantId}"));
-
-            Assert.True(ex.Message.Contains($"username: madeupuser@madeupdomain.com tenantId: {madeupuserTenantId}"));
+            Assert.AreEqual(ex.Message, $"SharedTokenCacheCredential authentication unavailable. No account matching the specified username: mockuser@mockdomain.com tenantId: {tenantId} was found in the cache.");
 
             await Task.CompletedTask;
         }
@@ -278,13 +284,7 @@ namespace Azure.Identity.Tests
 
             var ex = Assert.ThrowsAsync<CredentialUnavailableException>(async () => await credential.GetTokenAsync(new TokenRequestContext(MockScopes.Default)));
 
-            Assert.True(ex.Message.StartsWith("Multiple accounts matching the specified username: mockuser@mockdomain.com were found in the cache"));
-
-            Assert.True(ex.Message.Contains($"username: fakeuser@fakedomain.com tenantId: {fakeuserTenantId}"));
-
-            Assert.True(ex.Message.Contains($"username: mockuser@mockdomain.com tenantId: {mockuserTenantId}"));
-
-            Assert.True(ex.Message.Contains($"username: mockuser@mockdomain.com tenantId: {mockuserGuestTenantId}"));
+            Assert.AreEqual(ex.Message, "SharedTokenCacheCredential authentication unavailable. Multiple accounts matching the specified username: mockuser@mockdomain.com were found in the cache.");
 
             await Task.CompletedTask;
         }
@@ -308,13 +308,7 @@ namespace Azure.Identity.Tests
 
             var ex = Assert.ThrowsAsync<CredentialUnavailableException>(async () => await credential.GetTokenAsync(new TokenRequestContext(MockScopes.Default)));
 
-            Assert.True(ex.Message.StartsWith($"Multiple accounts matching the specified tenantId: {mockuserGuestTenantId} were found in the cache"));
-
-            Assert.True(ex.Message.Contains($"username: fakeuser@fakedomain.com tenantId: {fakeuserTenantId}"));
-
-            Assert.True(ex.Message.Contains($"username: mockuser@mockdomain.com tenantId: {mockuserTenantId}"));
-
-            Assert.True(ex.Message.Contains($"username: mockuser@mockdomain.com tenantId: {mockuserGuestTenantId}"));
+            Assert.AreEqual(ex.Message, $"SharedTokenCacheCredential authentication unavailable. Multiple accounts matching the specified tenantId: {mockuserGuestTenantId} were found in the cache.");
 
             await Task.CompletedTask;
         }
@@ -338,11 +332,7 @@ namespace Azure.Identity.Tests
 
             var ex = Assert.ThrowsAsync<CredentialUnavailableException>(async () => await credential.GetTokenAsync(new TokenRequestContext(MockScopes.Default)));
 
-            Assert.True(ex.Message.StartsWith($"Multiple accounts matching the specified username: mockuser@mockdomain.com tenantId: {mockuserTenantId} were found in the cache"));
-
-            Assert.True(ex.Message.Contains($"username: fakeuser@fakedomain.com tenantId: {fakeuserTenantId}"));
-
-            Assert.True(ex.Message.IndexOf($"username: mockuser@mockdomain.com tenantId: {mockuserTenantId}") != ex.Message.LastIndexOf($"username: mockuser@mockdomain.com tenantId: {mockuserTenantId}"));
+            Assert.AreEqual(ex.Message, $"SharedTokenCacheCredential authentication unavailable. Multiple accounts matching the specified username: mockuser@mockdomain.com tenantId: {mockuserTenantId} were found in the cache.");
 
             await Task.CompletedTask;
         }
@@ -364,7 +354,7 @@ namespace Azure.Identity.Tests
 
             var ex = Assert.ThrowsAsync<CredentialUnavailableException>(async () => await credential.GetTokenAsync(new TokenRequestContext(MockScopes.Default)));
 
-            var expErrorMessage = "Token acquisition failed for user mockuser@mockdomain.com. To fix, re-authenticate through developer tooling supporting Azure single sign on.";
+            var expErrorMessage = "SharedTokenCacheCredential authentication unavailable. Token acquisition failed for user mockuser@mockdomain.com. Ensure that you have authenticated with a developer tool that supports Azure single sign on.";
 
             Assert.AreEqual(expErrorMessage, ex.Message);
 

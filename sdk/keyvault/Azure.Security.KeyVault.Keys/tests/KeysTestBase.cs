@@ -5,79 +5,138 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Azure.Core.Testing;
+using Azure.Core.TestFramework;
 using Azure.Identity;
+using Azure.Security.KeyVault.Tests;
+using Castle.DynamicProxy;
 using NUnit.Framework;
 
 namespace Azure.Security.KeyVault.Keys.Tests
 {
-    public abstract class KeysTestBase : RecordedTestBase
+    [ClientTestFixture(
+        KeyClientOptions.ServiceVersion.V7_0,
+        KeyClientOptions.ServiceVersion.V7_1_Preview)]
+    [NonParallelizable]
+    public abstract class KeysTestBase : RecordedTestBase<KeyVaultTestEnvironment>
     {
         public const string AzureKeyVaultUrlEnvironmentVariable = "AZURE_KEYVAULT_URL";
+
+        protected readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(5);
 
         public KeyClient Client { get; set; }
 
         public Uri VaultUri { get; set; }
 
-        private readonly ConcurrentQueue<string> _keysToCleanup = new ConcurrentQueue<string>();
+        // Queue deletes, but poll on the top of the purge stack to increase likelihood of others being purged by then.
+        private readonly ConcurrentQueue<string> _keysToDelete = new ConcurrentQueue<string>();
+        private readonly ConcurrentStack<string> _keysToPurge = new ConcurrentStack<string>();
+        private readonly KeyClientOptions.ServiceVersion _serviceVersion;
 
-        protected KeysTestBase(bool isAsync) : base(isAsync)
+        private KeyVaultTestEventListener _listener;
+
+        protected KeysTestBase(bool isAsync, KeyClientOptions.ServiceVersion serviceVersion) : base(isAsync)
         {
+            _serviceVersion = serviceVersion;
         }
 
         internal KeyClient GetClient(TestRecording recording = null)
         {
             recording = recording ?? Recording;
 
-            return InstrumentClient
-                (new KeyClient(
-                    new Uri(recording.GetVariableFromEnvironment(AzureKeyVaultUrlEnvironmentVariable)),
-                    recording.GetCredential(new DefaultAzureCredential()),
-                    recording.InstrumentClientOptions(new KeyClientOptions())));
+            // Until https://github.com/Azure/azure-sdk-for-net/issues/8575 is fixed,
+            // we need to delay creation of keys due to aggressive service limits on key creation:
+            // https://docs.microsoft.com/azure/key-vault/key-vault-service-limits
+            IInterceptor[] interceptors = new[] { new DelayCreateKeyInterceptor(Mode) };
+
+            return InstrumentClient(
+                new KeyClient(
+                    new Uri(TestEnvironment.KeyVaultUrl),
+                    TestEnvironment.Credential,
+                    recording.InstrumentClientOptions(new KeyClientOptions(_serviceVersion))),
+                interceptors);
         }
 
         public override void StartTestRecording()
         {
             base.StartTestRecording();
 
+            _listener = new KeyVaultTestEventListener();
+
             Client = GetClient();
-            VaultUri = new Uri(Recording.GetVariableFromEnvironment(AzureKeyVaultUrlEnvironmentVariable));
+            VaultUri = new Uri(TestEnvironment.KeyVaultUrl);
+        }
+
+        public override void StopTestRecording()
+        {
+            _listener?.Dispose();
+
+            base.StopTestRecording();
+        }
+
+        [TearDown]
+        public async Task Cleanup()
+        {
+            // Start deleting resources as soon as possible.
+            while (_keysToDelete.TryDequeue(out string name))
+            {
+                await DeleteKey(name);
+
+                _keysToPurge.Push(name);
+            }
         }
 
         [OneTimeTearDown]
-        public async Task Cleanup()
+        public async Task CleanupAll()
         {
-            List<Task> cleanupTasks = new List<Task>();
+            // Make sure the delete queue is empty.
+            await Cleanup();
 
-            foreach (string name in _keysToCleanup)
+            while (_keysToPurge.TryPop(out string name))
             {
-                cleanupTasks.Add(CleanupKey(name));
+                await PurgeKey(name).ConfigureAwait(false);
             }
-
-            await Task.WhenAll(cleanupTasks);
         }
 
-        protected async Task CleanupKey(string name)
+        protected async Task DeleteKey(string name)
+        {
+            if (Mode == RecordedTestMode.Playback)
+            {
+                return;
+            }
+
+            try
+            {
+                using (Recording.DisableRecording())
+                {
+                    await Client.StartDeleteKeyAsync(name).ConfigureAwait(false);
+                }
+            }
+            catch (RequestFailedException ex) when (ex.Status == 404)
+            {
+            }
+        }
+
+        protected async Task PurgeKey(string name)
         {
             try
             {
-                await Client.StartDeleteKeyAsync(name);
+                await WaitForDeletedKey(name).ConfigureAwait(false);
             }
             catch (RequestFailedException ex) when (ex.Status == 404)
             {
             }
 
-            try
+            if (Mode == RecordedTestMode.Playback)
             {
-                await WaitForDeletedKey(name);
-            }
-            catch (RequestFailedException ex) when (ex.Status == 404)
-            {
+                return;
             }
 
             try
             {
-                await Client.PurgeDeletedKeyAsync(name);
+                using (Recording.DisableRecording())
+                {
+                    await Client.PurgeDeletedKeyAsync(name).ConfigureAwait(false);
+                }
             }
             catch (RequestFailedException ex) when (ex.Status == 404)
             {
@@ -86,7 +145,7 @@ namespace Azure.Security.KeyVault.Keys.Tests
 
         protected void RegisterForCleanup(string name)
         {
-            _keysToCleanup.Enqueue(name);
+            _keysToDelete.Enqueue(name);
         }
 
         protected void AssertKeyVaultKeysEqual(KeyVaultKey exp, KeyVaultKey act)
@@ -158,7 +217,7 @@ namespace Azure.Security.KeyVault.Keys.Tests
 
             using (Recording.DisableRecording())
             {
-                return TestRetryHelper.RetryAsync(async () => await Client.GetDeletedKeyAsync(name));
+                return TestRetryHelper.RetryAsync(async () => await Client.GetDeletedKeyAsync(name), delay: PollingInterval);
             }
         }
 
@@ -181,7 +240,7 @@ namespace Azure.Security.KeyVault.Keys.Tests
                     {
                         return (Response)null;
                     }
-                });
+                }, delay: PollingInterval);
             }
         }
 
@@ -194,7 +253,7 @@ namespace Azure.Security.KeyVault.Keys.Tests
 
             using (Recording.DisableRecording())
             {
-                return TestRetryHelper.RetryAsync(async () => await Client.GetKeyAsync(name));
+                return TestRetryHelper.RetryAsync(async () => await Client.GetKeyAsync(name), delay: PollingInterval);
             }
         }
     }

@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Azure.Core.Testing;
+using Azure.Core.TestFramework;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Test.Shared;
 using NUnit.Framework;
@@ -13,8 +13,8 @@ namespace Azure.Storage.Blobs.Test
 {
     public class EncryptedBlockBlobClientTests : BlobTestBase
     {
-        public EncryptedBlockBlobClientTests(bool async)
-            : base(async, null /* RecordedTestMode.Record /* to re-record */)
+        public EncryptedBlockBlobClientTests(bool async, BlobClientOptions.ServiceVersion serviceVersion)
+            : base(async, serviceVersion, null /* RecordedTestMode.Record /* to re-record */)
         {
         }
 

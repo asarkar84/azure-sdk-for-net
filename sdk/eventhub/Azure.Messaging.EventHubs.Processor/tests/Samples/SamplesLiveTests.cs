@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Azure.Messaging.EventHubs.Processor.Samples.Infrastructure;
-using Azure.Messaging.EventHubs.Processor.Tests.Infrastructure;
 using Azure.Messaging.EventHubs.Tests;
-using Azure.Messaging.EventHubs.Tests.Infrastructure;
 using NUnit.Framework;
 
 namespace Azure.Messaging.EventHubs.Processor.Tests
@@ -51,8 +49,8 @@ namespace Azure.Messaging.EventHubs.Processor.Tests
             await using (EventHubScope eventHubScope = await EventHubScope.CreateAsync(2))
             await using (StorageScope storageScope = await StorageScope.CreateAsync())
             {
-                var eventHubsConnectionString = TestEnvironment.EventHubsConnectionString;
-                var storageConnectionString = StorageTestEnvironment.StorageConnectionString;
+                var eventHubsConnectionString = EventHubsTestEnvironment.Instance.EventHubsConnectionString;
+                var storageConnectionString = StorageTestEnvironment.Instance.StorageConnectionString;
 
                 Assert.That(async () => await sample.RunAsync(eventHubsConnectionString, eventHubScope.EventHubName, storageConnectionString, storageScope.ContainerName), Throws.Nothing);
             }

@@ -1,8 +1,35 @@
 # Release History
 
-## Unreleased
+## 1.2.1  (2020-04-30)
+
+### Changed
+- Read client request ID value used for logging and tracing off the initial request object if available.
+
+### Bugfix
+- Fixed a bug when using Azure.Core based libraries in Blazor WebAssembly apps.
+
+## 1.2.0 (2020-04-03)
+
+### Added
+- `AzureKeyCredential` and its respective policy.
+
+### Changed
+- Response trace messages are properly identified.
+- Content type "application/x-www-form-urlencoded" is decoded in trace messages.
+
+## 1.1.0 (2020-03-05)
+
+### Fixes and improvements
+- Add OPTIONS and TRACE HTTP request methods.
+- Add `NetworkTimeout` property to `RetryOptions` and apply it to network operations like sending request or reading from the response stream.
+- Implement serialization for RequestFailedException.
+
+## 1.0.2 (2020-01-10)
 
 - Block bearer token authentication for non TLS protected endpoints.
+- Add support for retrying on request timeouts.
+- Add support for retrying on 408, 500, 502, 504 status codes.
+- Remove commit hash from User-Agent telemetry.
 
 ## 1.0.1
 
