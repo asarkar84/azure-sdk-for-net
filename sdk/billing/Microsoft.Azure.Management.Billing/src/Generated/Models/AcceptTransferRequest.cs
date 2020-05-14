@@ -10,8 +10,6 @@
 
 namespace Microsoft.Azure.Management.Billing.Models
 {
-    using Microsoft.Rest;
-    using Microsoft.Rest.Serialization;
     using Newtonsoft.Json;
     using System.Collections;
     using System.Collections.Generic;
@@ -20,7 +18,6 @@ namespace Microsoft.Azure.Management.Billing.Models
     /// <summary>
     /// Request parameters to accept transfer.
     /// </summary>
-    [Rest.Serialization.JsonTransformation]
     public partial class AcceptTransferRequest
     {
         /// <summary>
@@ -50,7 +47,7 @@ namespace Microsoft.Azure.Management.Billing.Models
         /// <summary>
         /// Gets or sets request parameters to accept transfer.
         /// </summary>
-        [JsonProperty(PropertyName = "properties.productDetails")]
+        [JsonProperty(PropertyName = "productDetails")]
         public IList<ProductDetails> ProductDetails { get; set; }
 
     }
