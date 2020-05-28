@@ -62,6 +62,8 @@ namespace Microsoft.Azure.Management.Billing.Models
         /// which the subscription is billed.</param>
         /// <param name="invoiceSectionDisplayName">The name of the invoice
         /// section to which the subscription is billed.</param>
+        /// <param name="isAccountAdmin">Indicates whether user is the account
+        /// admin.</param>
         /// <param name="productId">The product ID of the Azure plan.</param>
         /// <param name="productName">The product name of the Azure
         /// plan.</param>
@@ -69,7 +71,7 @@ namespace Microsoft.Azure.Management.Billing.Models
         /// subscription.</param>
         /// <param name="skuDescription">The sku description of the Azure plan
         /// for the subscription.</param>
-        public BillingProperty(string id = default(string), string name = default(string), string type = default(string), string accountAdminNotificationEmailAddress = default(string), string billingTenantId = default(string), string billingAccountId = default(string), string billingAccountDisplayName = default(string), string billingProfileId = default(string), string billingProfileDisplayName = default(string), string billingProfileStatus = default(string), string billingProfileStatusReasonCode = default(string), string billingProfileSpendingLimit = default(string), string costCenter = default(string), string invoiceSectionId = default(string), string invoiceSectionDisplayName = default(string), string productId = default(string), string productName = default(string), string skuId = default(string), string skuDescription = default(string))
+        public BillingProperty(string id = default(string), string name = default(string), string type = default(string), string accountAdminNotificationEmailAddress = default(string), string billingTenantId = default(string), string billingAccountId = default(string), string billingAccountDisplayName = default(string), string billingProfileId = default(string), string billingProfileDisplayName = default(string), string billingProfileStatus = default(string), string billingProfileStatusReasonCode = default(string), string billingProfileSpendingLimit = default(string), string costCenter = default(string), string invoiceSectionId = default(string), string invoiceSectionDisplayName = default(string), bool? isAccountAdmin = default(bool?), string productId = default(string), string productName = default(string), string skuId = default(string), string skuDescription = default(string))
             : base(id, name, type)
         {
             AccountAdminNotificationEmailAddress = accountAdminNotificationEmailAddress;
@@ -84,6 +86,7 @@ namespace Microsoft.Azure.Management.Billing.Models
             CostCenter = costCenter;
             InvoiceSectionId = invoiceSectionId;
             InvoiceSectionDisplayName = invoiceSectionDisplayName;
+            IsAccountAdmin = isAccountAdmin;
             ProductId = productId;
             ProductName = productName;
             SkuId = skuId;
@@ -179,6 +182,12 @@ namespace Microsoft.Azure.Management.Billing.Models
         /// </summary>
         [JsonProperty(PropertyName = "properties.invoiceSectionDisplayName")]
         public string InvoiceSectionDisplayName { get; private set; }
+
+        /// <summary>
+        /// Gets indicates whether user is the account admin.
+        /// </summary>
+        [JsonProperty(PropertyName = "properties.isAccountAdmin")]
+        public bool? IsAccountAdmin { get; private set; }
 
         /// <summary>
         /// Gets the product ID of the Azure plan.

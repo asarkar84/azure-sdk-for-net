@@ -127,16 +127,6 @@ namespace Microsoft.Azure.Management.Billing
         public virtual IProductsOperations Products { get; private set; }
 
         /// <summary>
-        /// Gets the IDepartmentsOperations.
-        /// </summary>
-        public virtual IDepartmentsOperations Departments { get; private set; }
-
-        /// <summary>
-        /// Gets the IEnrollmentAccountsOperations.
-        /// </summary>
-        public virtual IEnrollmentAccountsOperations EnrollmentAccounts { get; private set; }
-
-        /// <summary>
         /// Gets the IInvoicesOperations.
         /// </summary>
         public virtual IInvoicesOperations Invoices { get; private set; }
@@ -155,21 +145,6 @@ namespace Microsoft.Azure.Management.Billing
         /// Gets the IBillingPropertyOperations.
         /// </summary>
         public virtual IBillingPropertyOperations BillingProperty { get; private set; }
-
-        /// <summary>
-        /// Gets the ITransfersOperations.
-        /// </summary>
-        public virtual ITransfersOperations Transfers { get; private set; }
-
-        /// <summary>
-        /// Gets the IPartnerTransfersOperations.
-        /// </summary>
-        public virtual IPartnerTransfersOperations PartnerTransfers { get; private set; }
-
-        /// <summary>
-        /// Gets the IRecipientTransfersOperations.
-        /// </summary>
-        public virtual IRecipientTransfersOperations RecipientTransfers { get; private set; }
 
         /// <summary>
         /// Gets the IOperations.
@@ -442,15 +417,10 @@ namespace Microsoft.Azure.Management.Billing
             BillingPermissions = new BillingPermissionsOperations(this);
             BillingSubscriptions = new BillingSubscriptionsOperations(this);
             Products = new ProductsOperations(this);
-            Departments = new DepartmentsOperations(this);
-            EnrollmentAccounts = new EnrollmentAccountsOperations(this);
             Invoices = new InvoicesOperations(this);
             Transactions = new TransactionsOperations(this);
             Policies = new PoliciesOperations(this);
             BillingProperty = new BillingPropertyOperations(this);
-            Transfers = new TransfersOperations(this);
-            PartnerTransfers = new PartnerTransfersOperations(this);
-            RecipientTransfers = new RecipientTransfersOperations(this);
             Operations = new Operations(this);
             BillingRoleDefinitions = new BillingRoleDefinitionsOperations(this);
             BillingRoleAssignments = new BillingRoleAssignmentsOperations(this);

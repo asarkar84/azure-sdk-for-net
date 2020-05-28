@@ -814,9 +814,6 @@ namespace Microsoft.Azure.Management.Billing
         /// <param name='billingAccountName'>
         /// The ID that uniquely identifies a billing account.
         /// </param>
-        /// <param name='billingSubscriptionName'>
-        /// The ID that uniquely identifies a subscription.
-        /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.
         /// </param>
@@ -838,15 +835,15 @@ namespace Microsoft.Azure.Management.Billing
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<AzureOperationResponse<BillingSubscription>> GetWithHttpMessagesAsync(string billingAccountName, string billingSubscriptionName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AzureOperationResponse<BillingSubscription>> GetWithHttpMessagesAsync(string billingAccountName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (billingAccountName == null)
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "billingAccountName");
             }
-            if (billingSubscriptionName == null)
+            if (Client.SubscriptionId == null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "billingSubscriptionName");
+                throw new ValidationException(ValidationRules.CannotBeNull, "this.Client.SubscriptionId");
             }
             if (Client.ApiVersion == null)
             {
@@ -860,15 +857,14 @@ namespace Microsoft.Azure.Management.Billing
                 _invocationId = ServiceClientTracing.NextInvocationId.ToString();
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
                 tracingParameters.Add("billingAccountName", billingAccountName);
-                tracingParameters.Add("billingSubscriptionName", billingSubscriptionName);
                 tracingParameters.Add("cancellationToken", cancellationToken);
                 ServiceClientTracing.Enter(_invocationId, this, "Get", tracingParameters);
             }
             // Construct URL
             var _baseUrl = Client.BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingSubscriptions/{billingSubscriptionName}").ToString();
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingSubscriptions/{subscriptionId}").ToString();
             _url = _url.Replace("{billingAccountName}", System.Uri.EscapeDataString(billingAccountName));
-            _url = _url.Replace("{billingSubscriptionName}", System.Uri.EscapeDataString(billingSubscriptionName));
+            _url = _url.Replace("{subscriptionId}", System.Uri.EscapeDataString(Client.SubscriptionId));
             List<string> _queryParameters = new List<string>();
             if (Client.ApiVersion != null)
             {
@@ -1002,9 +998,6 @@ namespace Microsoft.Azure.Management.Billing
         /// <param name='billingAccountName'>
         /// The ID that uniquely identifies a billing account.
         /// </param>
-        /// <param name='billingSubscriptionName'>
-        /// The ID that uniquely identifies a subscription.
-        /// </param>
         /// <param name='parameters'>
         /// Request parameters that are provided to the update billing subscription
         /// operation.
@@ -1030,15 +1023,15 @@ namespace Microsoft.Azure.Management.Billing
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<AzureOperationResponse<BillingSubscription>> UpdateWithHttpMessagesAsync(string billingAccountName, string billingSubscriptionName, BillingSubscription parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AzureOperationResponse<BillingSubscription>> UpdateWithHttpMessagesAsync(string billingAccountName, BillingSubscription parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (billingAccountName == null)
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "billingAccountName");
             }
-            if (billingSubscriptionName == null)
+            if (Client.SubscriptionId == null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "billingSubscriptionName");
+                throw new ValidationException(ValidationRules.CannotBeNull, "this.Client.SubscriptionId");
             }
             if (Client.ApiVersion == null)
             {
@@ -1056,16 +1049,15 @@ namespace Microsoft.Azure.Management.Billing
                 _invocationId = ServiceClientTracing.NextInvocationId.ToString();
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
                 tracingParameters.Add("billingAccountName", billingAccountName);
-                tracingParameters.Add("billingSubscriptionName", billingSubscriptionName);
                 tracingParameters.Add("parameters", parameters);
                 tracingParameters.Add("cancellationToken", cancellationToken);
                 ServiceClientTracing.Enter(_invocationId, this, "Update", tracingParameters);
             }
             // Construct URL
             var _baseUrl = Client.BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingSubscriptions/{billingSubscriptionName}").ToString();
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingSubscriptions/{subscriptionId}").ToString();
             _url = _url.Replace("{billingAccountName}", System.Uri.EscapeDataString(billingAccountName));
-            _url = _url.Replace("{billingSubscriptionName}", System.Uri.EscapeDataString(billingSubscriptionName));
+            _url = _url.Replace("{subscriptionId}", System.Uri.EscapeDataString(Client.SubscriptionId));
             List<string> _queryParameters = new List<string>();
             if (Client.ApiVersion != null)
             {
@@ -1200,19 +1192,15 @@ namespace Microsoft.Azure.Management.Billing
         /// <summary>
         /// Moves a subscription's charges to a new invoice section. The new invoice
         /// section must belong to the same billing profile as the existing invoice
-        /// section. This operation is supported only for products that are purchased
-        /// with a recurring charge and for billing accounts with agreement type
-        /// Microsoft Customer Agreement.
+        /// section. This operation is supported for billing accounts with agreement
+        /// type Microsoft Customer Agreement.
         /// <see href="https://docs.microsoft.com/en-us/rest/api/billing/" />
         /// </summary>
         /// <param name='billingAccountName'>
         /// The ID that uniquely identifies a billing account.
         /// </param>
-        /// <param name='billingSubscriptionName'>
-        /// The ID that uniquely identifies a subscription.
-        /// </param>
         /// <param name='parameters'>
-        /// Request parameters that are provided to the transfer product operation.
+        /// Request parameters that are provided to the move subscription operation.
         /// </param>
         /// <param name='customHeaders'>
         /// The headers that will be added to request.
@@ -1220,28 +1208,24 @@ namespace Microsoft.Azure.Management.Billing
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        public async Task<AzureOperationResponse<BillingSubscription,BillingSubscriptionsMoveHeaders>> MoveWithHttpMessagesAsync(string billingAccountName, string billingSubscriptionName, TransferBillingSubscriptionRequestProperties parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AzureOperationResponse<BillingSubscription,BillingSubscriptionsMoveHeaders>> MoveWithHttpMessagesAsync(string billingAccountName, TransferBillingSubscriptionRequestProperties parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             // Send request
-            AzureOperationResponse<BillingSubscription,BillingSubscriptionsMoveHeaders> _response = await BeginMoveWithHttpMessagesAsync(billingAccountName, billingSubscriptionName, parameters, customHeaders, cancellationToken).ConfigureAwait(false);
+            AzureOperationResponse<BillingSubscription,BillingSubscriptionsMoveHeaders> _response = await BeginMoveWithHttpMessagesAsync(billingAccountName, parameters, customHeaders, cancellationToken).ConfigureAwait(false);
             return await Client.GetPostOrDeleteOperationResultAsync(_response, customHeaders, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Validates if a subscription's charges can be moved to a new invoice
-        /// section. This operation is supported only for products that are purchased
-        /// with a recurring charge and for billing accounts with agreement type
-        /// Microsoft Customer Agreement.
+        /// section. This operation is supported for billing accounts with agreement
+        /// type Microsoft Customer Agreement.
         /// <see href="https://docs.microsoft.com/en-us/rest/api/billing/" />
         /// </summary>
         /// <param name='billingAccountName'>
         /// The ID that uniquely identifies a billing account.
         /// </param>
-        /// <param name='billingSubscriptionName'>
-        /// The ID that uniquely identifies a subscription.
-        /// </param>
         /// <param name='parameters'>
-        /// Request parameters that are provided to the validate transfer eligibility
+        /// Request parameters that are provided to the validate move eligibility
         /// operation.
         /// </param>
         /// <param name='customHeaders'>
@@ -1265,15 +1249,15 @@ namespace Microsoft.Azure.Management.Billing
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<AzureOperationResponse<ValidateSubscriptionTransferEligibilityResult>> ValidateMoveWithHttpMessagesAsync(string billingAccountName, string billingSubscriptionName, TransferBillingSubscriptionRequestProperties parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AzureOperationResponse<ValidateSubscriptionTransferEligibilityResult>> ValidateMoveWithHttpMessagesAsync(string billingAccountName, TransferBillingSubscriptionRequestProperties parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (billingAccountName == null)
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "billingAccountName");
             }
-            if (billingSubscriptionName == null)
+            if (Client.SubscriptionId == null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "billingSubscriptionName");
+                throw new ValidationException(ValidationRules.CannotBeNull, "this.Client.SubscriptionId");
             }
             if (parameters == null)
             {
@@ -1291,16 +1275,15 @@ namespace Microsoft.Azure.Management.Billing
                 _invocationId = ServiceClientTracing.NextInvocationId.ToString();
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
                 tracingParameters.Add("billingAccountName", billingAccountName);
-                tracingParameters.Add("billingSubscriptionName", billingSubscriptionName);
                 tracingParameters.Add("parameters", parameters);
                 tracingParameters.Add("cancellationToken", cancellationToken);
                 ServiceClientTracing.Enter(_invocationId, this, "ValidateMove", tracingParameters);
             }
             // Construct URL
             var _baseUrl = Client.BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingSubscriptions/{billingSubscriptionName}/validateMoveEligibility").ToString();
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingSubscriptions/{subscriptionId}/validateMoveEligibility").ToString();
             _url = _url.Replace("{billingAccountName}", System.Uri.EscapeDataString(billingAccountName));
-            _url = _url.Replace("{billingSubscriptionName}", System.Uri.EscapeDataString(billingSubscriptionName));
+            _url = _url.Replace("{subscriptionId}", System.Uri.EscapeDataString(Client.SubscriptionId));
             List<string> _queryParameters = new List<string>();
             if (_queryParameters.Count > 0)
             {
@@ -1431,19 +1414,15 @@ namespace Microsoft.Azure.Management.Billing
         /// <summary>
         /// Moves a subscription's charges to a new invoice section. The new invoice
         /// section must belong to the same billing profile as the existing invoice
-        /// section. This operation is supported only for products that are purchased
-        /// with a recurring charge and for billing accounts with agreement type
-        /// Microsoft Customer Agreement.
+        /// section. This operation is supported for billing accounts with agreement
+        /// type Microsoft Customer Agreement.
         /// <see href="https://docs.microsoft.com/en-us/rest/api/billing/" />
         /// </summary>
         /// <param name='billingAccountName'>
         /// The ID that uniquely identifies a billing account.
         /// </param>
-        /// <param name='billingSubscriptionName'>
-        /// The ID that uniquely identifies a subscription.
-        /// </param>
         /// <param name='parameters'>
-        /// Request parameters that are provided to the transfer product operation.
+        /// Request parameters that are provided to the move subscription operation.
         /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.
@@ -1466,15 +1445,15 @@ namespace Microsoft.Azure.Management.Billing
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<AzureOperationResponse<BillingSubscription,BillingSubscriptionsMoveHeaders>> BeginMoveWithHttpMessagesAsync(string billingAccountName, string billingSubscriptionName, TransferBillingSubscriptionRequestProperties parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AzureOperationResponse<BillingSubscription,BillingSubscriptionsMoveHeaders>> BeginMoveWithHttpMessagesAsync(string billingAccountName, TransferBillingSubscriptionRequestProperties parameters, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (billingAccountName == null)
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "billingAccountName");
             }
-            if (billingSubscriptionName == null)
+            if (Client.SubscriptionId == null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "billingSubscriptionName");
+                throw new ValidationException(ValidationRules.CannotBeNull, "this.Client.SubscriptionId");
             }
             if (parameters == null)
             {
@@ -1492,16 +1471,15 @@ namespace Microsoft.Azure.Management.Billing
                 _invocationId = ServiceClientTracing.NextInvocationId.ToString();
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
                 tracingParameters.Add("billingAccountName", billingAccountName);
-                tracingParameters.Add("billingSubscriptionName", billingSubscriptionName);
                 tracingParameters.Add("parameters", parameters);
                 tracingParameters.Add("cancellationToken", cancellationToken);
                 ServiceClientTracing.Enter(_invocationId, this, "BeginMove", tracingParameters);
             }
             // Construct URL
             var _baseUrl = Client.BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingSubscriptions/{billingSubscriptionName}/move").ToString();
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingSubscriptions/{subscriptionId}/move").ToString();
             _url = _url.Replace("{billingAccountName}", System.Uri.EscapeDataString(billingAccountName));
-            _url = _url.Replace("{billingSubscriptionName}", System.Uri.EscapeDataString(billingSubscriptionName));
+            _url = _url.Replace("{subscriptionId}", System.Uri.EscapeDataString(Client.SubscriptionId));
             List<string> _queryParameters = new List<string>();
             if (_queryParameters.Count > 0)
             {

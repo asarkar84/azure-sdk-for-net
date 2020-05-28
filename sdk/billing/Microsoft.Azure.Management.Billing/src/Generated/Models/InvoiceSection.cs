@@ -13,6 +13,8 @@ namespace Microsoft.Azure.Management.Billing.Models
     using Microsoft.Rest;
     using Microsoft.Rest.Serialization;
     using Newtonsoft.Json;
+    using System.Collections;
+    using System.Collections.Generic;
     using System.Linq;
 
     /// <summary>
@@ -40,7 +42,7 @@ namespace Microsoft.Azure.Management.Billing.Models
         /// invoice section.</param>
         /// <param name="systemId">The system generated unique identifier for
         /// an invoice section.</param>
-        public InvoiceSection(string id = default(string), string name = default(string), string type = default(string), string displayName = default(string), object labels = default(object), string systemId = default(string))
+        public InvoiceSection(string id = default(string), string name = default(string), string type = default(string), string displayName = default(string), IDictionary<string, string> labels = default(IDictionary<string, string>), string systemId = default(string))
             : base(id, name, type)
         {
             DisplayName = displayName;
@@ -65,7 +67,7 @@ namespace Microsoft.Azure.Management.Billing.Models
         /// section.
         /// </summary>
         [JsonProperty(PropertyName = "properties.labels")]
-        public object Labels { get; set; }
+        public IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
         /// Gets the system generated unique identifier for an invoice section.

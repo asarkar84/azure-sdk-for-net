@@ -215,12 +215,9 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
-            public static BillingSubscription Get(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName)
+            public static BillingSubscription Get(this IBillingSubscriptionsOperations operations, string billingAccountName)
             {
-                return operations.GetAsync(billingAccountName, billingSubscriptionName).GetAwaiter().GetResult();
+                return operations.GetAsync(billingAccountName).GetAwaiter().GetResult();
             }
 
             /// <summary>
@@ -235,15 +232,12 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<BillingSubscription> GetAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<BillingSubscription> GetAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.GetWithHttpMessagesAsync(billingAccountName, billingSubscriptionName, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.GetWithHttpMessagesAsync(billingAccountName, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
@@ -260,16 +254,13 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
             /// <param name='parameters'>
             /// Request parameters that are provided to the update billing subscription
             /// operation.
             /// </param>
-            public static BillingSubscription Update(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName, BillingSubscription parameters)
+            public static BillingSubscription Update(this IBillingSubscriptionsOperations operations, string billingAccountName, BillingSubscription parameters)
             {
-                return operations.UpdateAsync(billingAccountName, billingSubscriptionName, parameters).GetAwaiter().GetResult();
+                return operations.UpdateAsync(billingAccountName, parameters).GetAwaiter().GetResult();
             }
 
             /// <summary>
@@ -283,9 +274,6 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
             /// <param name='parameters'>
             /// Request parameters that are provided to the update billing subscription
             /// operation.
@@ -293,9 +281,9 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<BillingSubscription> UpdateAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName, BillingSubscription parameters, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<BillingSubscription> UpdateAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, BillingSubscription parameters, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.UpdateWithHttpMessagesAsync(billingAccountName, billingSubscriptionName, parameters, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.UpdateWithHttpMessagesAsync(billingAccountName, parameters, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
@@ -304,9 +292,8 @@ namespace Microsoft.Azure.Management.Billing
             /// <summary>
             /// Moves a subscription's charges to a new invoice section. The new invoice
             /// section must belong to the same billing profile as the existing invoice
-            /// section. This operation is supported only for products that are purchased
-            /// with a recurring charge and for billing accounts with agreement type
-            /// Microsoft Customer Agreement.
+            /// section. This operation is supported for billing accounts with agreement
+            /// type Microsoft Customer Agreement.
             /// <see href="https://docs.microsoft.com/en-us/rest/api/billing/" />
             /// </summary>
             /// <param name='operations'>
@@ -315,23 +302,19 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
             /// <param name='parameters'>
-            /// Request parameters that are provided to the transfer product operation.
+            /// Request parameters that are provided to the move subscription operation.
             /// </param>
-            public static BillingSubscription Move(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName, TransferBillingSubscriptionRequestProperties parameters)
+            public static BillingSubscription Move(this IBillingSubscriptionsOperations operations, string billingAccountName, TransferBillingSubscriptionRequestProperties parameters)
             {
-                return operations.MoveAsync(billingAccountName, billingSubscriptionName, parameters).GetAwaiter().GetResult();
+                return operations.MoveAsync(billingAccountName, parameters).GetAwaiter().GetResult();
             }
 
             /// <summary>
             /// Moves a subscription's charges to a new invoice section. The new invoice
             /// section must belong to the same billing profile as the existing invoice
-            /// section. This operation is supported only for products that are purchased
-            /// with a recurring charge and for billing accounts with agreement type
-            /// Microsoft Customer Agreement.
+            /// section. This operation is supported for billing accounts with agreement
+            /// type Microsoft Customer Agreement.
             /// <see href="https://docs.microsoft.com/en-us/rest/api/billing/" />
             /// </summary>
             /// <param name='operations'>
@@ -340,18 +323,15 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
             /// <param name='parameters'>
-            /// Request parameters that are provided to the transfer product operation.
+            /// Request parameters that are provided to the move subscription operation.
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<BillingSubscription> MoveAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName, TransferBillingSubscriptionRequestProperties parameters, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<BillingSubscription> MoveAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, TransferBillingSubscriptionRequestProperties parameters, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.MoveWithHttpMessagesAsync(billingAccountName, billingSubscriptionName, parameters, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.MoveWithHttpMessagesAsync(billingAccountName, parameters, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
@@ -359,9 +339,8 @@ namespace Microsoft.Azure.Management.Billing
 
             /// <summary>
             /// Validates if a subscription's charges can be moved to a new invoice
-            /// section. This operation is supported only for products that are purchased
-            /// with a recurring charge and for billing accounts with agreement type
-            /// Microsoft Customer Agreement.
+            /// section. This operation is supported for billing accounts with agreement
+            /// type Microsoft Customer Agreement.
             /// <see href="https://docs.microsoft.com/en-us/rest/api/billing/" />
             /// </summary>
             /// <param name='operations'>
@@ -370,23 +349,19 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
             /// <param name='parameters'>
-            /// Request parameters that are provided to the validate transfer eligibility
+            /// Request parameters that are provided to the validate move eligibility
             /// operation.
             /// </param>
-            public static ValidateSubscriptionTransferEligibilityResult ValidateMove(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName, TransferBillingSubscriptionRequestProperties parameters)
+            public static ValidateSubscriptionTransferEligibilityResult ValidateMove(this IBillingSubscriptionsOperations operations, string billingAccountName, TransferBillingSubscriptionRequestProperties parameters)
             {
-                return operations.ValidateMoveAsync(billingAccountName, billingSubscriptionName, parameters).GetAwaiter().GetResult();
+                return operations.ValidateMoveAsync(billingAccountName, parameters).GetAwaiter().GetResult();
             }
 
             /// <summary>
             /// Validates if a subscription's charges can be moved to a new invoice
-            /// section. This operation is supported only for products that are purchased
-            /// with a recurring charge and for billing accounts with agreement type
-            /// Microsoft Customer Agreement.
+            /// section. This operation is supported for billing accounts with agreement
+            /// type Microsoft Customer Agreement.
             /// <see href="https://docs.microsoft.com/en-us/rest/api/billing/" />
             /// </summary>
             /// <param name='operations'>
@@ -395,19 +370,16 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
             /// <param name='parameters'>
-            /// Request parameters that are provided to the validate transfer eligibility
+            /// Request parameters that are provided to the validate move eligibility
             /// operation.
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<ValidateSubscriptionTransferEligibilityResult> ValidateMoveAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName, TransferBillingSubscriptionRequestProperties parameters, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<ValidateSubscriptionTransferEligibilityResult> ValidateMoveAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, TransferBillingSubscriptionRequestProperties parameters, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.ValidateMoveWithHttpMessagesAsync(billingAccountName, billingSubscriptionName, parameters, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.ValidateMoveWithHttpMessagesAsync(billingAccountName, parameters, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
@@ -416,9 +388,8 @@ namespace Microsoft.Azure.Management.Billing
             /// <summary>
             /// Moves a subscription's charges to a new invoice section. The new invoice
             /// section must belong to the same billing profile as the existing invoice
-            /// section. This operation is supported only for products that are purchased
-            /// with a recurring charge and for billing accounts with agreement type
-            /// Microsoft Customer Agreement.
+            /// section. This operation is supported for billing accounts with agreement
+            /// type Microsoft Customer Agreement.
             /// <see href="https://docs.microsoft.com/en-us/rest/api/billing/" />
             /// </summary>
             /// <param name='operations'>
@@ -427,23 +398,19 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
             /// <param name='parameters'>
-            /// Request parameters that are provided to the transfer product operation.
+            /// Request parameters that are provided to the move subscription operation.
             /// </param>
-            public static BillingSubscription BeginMove(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName, TransferBillingSubscriptionRequestProperties parameters)
+            public static BillingSubscription BeginMove(this IBillingSubscriptionsOperations operations, string billingAccountName, TransferBillingSubscriptionRequestProperties parameters)
             {
-                return operations.BeginMoveAsync(billingAccountName, billingSubscriptionName, parameters).GetAwaiter().GetResult();
+                return operations.BeginMoveAsync(billingAccountName, parameters).GetAwaiter().GetResult();
             }
 
             /// <summary>
             /// Moves a subscription's charges to a new invoice section. The new invoice
             /// section must belong to the same billing profile as the existing invoice
-            /// section. This operation is supported only for products that are purchased
-            /// with a recurring charge and for billing accounts with agreement type
-            /// Microsoft Customer Agreement.
+            /// section. This operation is supported for billing accounts with agreement
+            /// type Microsoft Customer Agreement.
             /// <see href="https://docs.microsoft.com/en-us/rest/api/billing/" />
             /// </summary>
             /// <param name='operations'>
@@ -452,18 +419,15 @@ namespace Microsoft.Azure.Management.Billing
             /// <param name='billingAccountName'>
             /// The ID that uniquely identifies a billing account.
             /// </param>
-            /// <param name='billingSubscriptionName'>
-            /// The ID that uniquely identifies a subscription.
-            /// </param>
             /// <param name='parameters'>
-            /// Request parameters that are provided to the transfer product operation.
+            /// Request parameters that are provided to the move subscription operation.
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<BillingSubscription> BeginMoveAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, string billingSubscriptionName, TransferBillingSubscriptionRequestProperties parameters, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<BillingSubscription> BeginMoveAsync(this IBillingSubscriptionsOperations operations, string billingAccountName, TransferBillingSubscriptionRequestProperties parameters, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.BeginMoveWithHttpMessagesAsync(billingAccountName, billingSubscriptionName, parameters, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.BeginMoveWithHttpMessagesAsync(billingAccountName, parameters, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }

@@ -122,16 +122,6 @@ namespace Microsoft.Azure.Management.Billing
         IProductsOperations Products { get; }
 
         /// <summary>
-        /// Gets the IDepartmentsOperations.
-        /// </summary>
-        IDepartmentsOperations Departments { get; }
-
-        /// <summary>
-        /// Gets the IEnrollmentAccountsOperations.
-        /// </summary>
-        IEnrollmentAccountsOperations EnrollmentAccounts { get; }
-
-        /// <summary>
         /// Gets the IInvoicesOperations.
         /// </summary>
         IInvoicesOperations Invoices { get; }
@@ -150,21 +140,6 @@ namespace Microsoft.Azure.Management.Billing
         /// Gets the IBillingPropertyOperations.
         /// </summary>
         IBillingPropertyOperations BillingProperty { get; }
-
-        /// <summary>
-        /// Gets the ITransfersOperations.
-        /// </summary>
-        ITransfersOperations Transfers { get; }
-
-        /// <summary>
-        /// Gets the IPartnerTransfersOperations.
-        /// </summary>
-        IPartnerTransfersOperations PartnerTransfers { get; }
-
-        /// <summary>
-        /// Gets the IRecipientTransfersOperations.
-        /// </summary>
-        IRecipientTransfersOperations RecipientTransfers { get; }
 
         /// <summary>
         /// Gets the IOperations.
