@@ -14,8 +14,8 @@ namespace Billing.Tests.ScenarioTests
 {
     public class BillingAccountsOperationsTest : TestBase
     {
-        private const string BillingAccountName = "723c8ce0-33ba-5ba7-ef23-e1b72f15f1d8:4ce5b530-c82b-44e8-97ec-49f3cce9f14d_2019-05-31";
-        private const string BillingProfileName = "H6RI-TXWC-BG7-PGB";
+        private const string BillingAccountName = "692a1ef6-595a-5578-8776-de10c9d64861:5869ea10-a21e-423f-9213-2ca0d1938908_2019-05-31";
+        private const string BillingProfileName = "DSNH-WUZE-BG7-TGB";
         
         [Fact]
         public void ExpandBillingAccountByBillingProfileTest()
@@ -35,7 +35,7 @@ namespace Billing.Tests.ScenarioTests
                 // Verify the response
                 Assert.NotNull(billingAccount);
                 Assert.Equal(BillingAccountName, billingAccount.Name);
-                Assert.Equal(1, billingAccount.BillingProfiles.Count);
+                Assert.Equal(1, billingAccount.BillingProfiles.Value.Count);
             }
         }
 
@@ -57,9 +57,9 @@ namespace Billing.Tests.ScenarioTests
                 // Verify the response
                 Assert.NotNull(billingAccount);
                 Assert.Equal(BillingAccountName, billingAccount.Name);
-                var billingProfile = Assert.Single(billingAccount.BillingProfiles);
+                var billingProfile = Assert.Single(billingAccount.BillingProfiles.Value);
                 Assert.Equal(BillingProfileName, billingProfile.Name);
-                Assert.True(billingProfile.InvoiceSections.Count > 0);
+                Assert.True(billingProfile.InvoiceSections.Value.Count > 0);
             }
         }
 
@@ -125,9 +125,9 @@ namespace Billing.Tests.ScenarioTests
                 Assert.NotNull(billingAccounts);
                 var billingAccount = Assert.Single(billingAccounts);
                 Assert.Equal(BillingAccountName, billingAccount.Name);
-                var billingProfile = Assert.Single(billingAccount.BillingProfiles);
+                var billingProfile = Assert.Single(billingAccount.BillingProfiles.Value);
                 Assert.Equal(BillingProfileName, billingProfile.Name);
-                Assert.True(billingProfile.InvoiceSections.Count > 0);
+                Assert.True(billingProfile.InvoiceSections.Value.Count > 0);
             }
         }
     }
